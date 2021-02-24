@@ -6,7 +6,12 @@ import java.util.*;
 public class graph {
 
 	double [] [] adj;
-	
+	int pairWithHighestShortestPathsTotal;
+
+	graph(){
+	}
+
+
 	graph (double [] [] a) {
 		adj= new double [a.length][a.length];
 		for (int i=0;i<a.length;i++)
@@ -111,35 +116,162 @@ public class graph {
 */
 
 
+	int getNforGraph( String playgroundsfile ) throws Exception {
+		BufferedReader input = new BufferedReader(new FileReader(playgroundsfile + ".csv"));
+		String last = "", line;
+		while ((line = input.readLine()) != null) {
+			last = line;
+		}
+		String [] lastLine = last.split(",");
+		return Integer.parseInt(lastLine[0]);
+	}
 
-	public static void main ( String [] args ) throws Exception {
 
-		int N=1000;
-		
+        void makeGraph (double [] [] a) {
+                adj= new double [a.length][a.length];
+                for (int i=0;i<a.length;i++)
+                        for (int j=0;j<a.length;j++)
+                                adj[i][j]=a[i][j];
+	}
+
+	double [][] getGraphEdges (String edgeValuesFile, int N) throws Exception {
 		double edges [][] = new double [N][N];
-		
 		for ( int i = 0; i < N; i++ )
 		       for ( int j = 0; j < N; j++ )
 		       		edges[i][j] = 0.0;	       
-		
-		Scanner s = new Scanner (new FileReader("randomGraphTube.csv"));
+		Scanner s = new Scanner (new FileReader(edgeValuesFile));
 		String z;
-		z = s.nextLine();
-
 		while (s.hasNext()) {
 			z = s.nextLine();
 			String [] results = z.split(",");
-			edges [Integer.parseInt(results[0])] [Integer.parseInt(results[1])] = Double.parseDouble(results[2]);
+			try {
+				edges [Integer.parseInt(results[0]) - 1] [Integer.parseInt(results[1]) - 1] = Double.parseDouble(results[2]);
+			} catch (NumberFormatException nfe) {
+				// skip
+			}
+		}
+		return edges;
+	}
+
+	int howManyShortestPathsBetweenPlaygroundAandB( int a, int b) {
+		HashSet <ArrayList <Integer>> resultFromShortestPath = shortestPaths(a, b); 
+		return resultFromShortestPath.size();
+	}	
+
+	 String pairWithHighestNumberOfShortestPaths(int N) {
+
+		List<Pair> pairs = getAllPairs(N);
+		List<Pair> highestPairs = new ArrayList<Pair>();
+		int highestShortestPaths = 0;
+
+		for (int i=0; i < pairs.size(); i++) {
+			int currentPairShortestPathsTotal = howManyShortestPathsBetweenPlaygroundAandB(pairs.get(i).x, pairs.get(i).y);
+
+
+			if (currentPairShortestPathsTotal > highestShortestPaths) {
+
+				highestPairs = new ArrayList<Pair>();
+				highestPairs.add( pairs.get(i) );
+				highestShortestPaths = currentPairShortestPathsTotal;
+
+			}	else if ( currentPairShortestPathsTotal == highestShortestPaths  ) {
+
+					highestPairs.add( pairs.get(i) );
+			}
 		}
 
-		graph G = new graph (edges); 
+		this.pairWithHighestShortestPathsTotal = highestShortestPaths;
+		return getAnswerAsAString(highestPairs);
 
-		System.out.println(G.dijkstra(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
+	}
+
+	
+	String getAnswerAsAString( List <Pair> highestPairs ) {
+
+		String Answer = "";
+
+		for (int i = 0; i < highestPairs.size(); i++){
+			Answer += "[" + highestPairs.get(i).x + ", " + highestPairs.get(i).y + "]";
+			if (i != highestPairs.size()-1) Answer += ",";
+		}
+
+		return Answer;
+
+	}
+
+
+	// // taken from https://stackoverflow.com/questions/9453074/generating-all-unique-pairs-from-a-list-of-numbers-n-choose-2
+	class Pair {
+		int x,y;
+		Pair(int x, int y){
+			this.x = x;
+			this.y = y;
+		}
+	}
+	// taken from https://stackoverflow.com/questions/9453074/generating-all-unique-pairs-from-a-list-of-numbers-n-choose-2
+	List<Pair> getAllPairs(int N) {
+		List<Pair> pairs = new ArrayList<Pair>();
+		int total = N;
+		for(int i=1; i <= total; i++) {
+			int num1 = i;
+			for(int j=i+1; j <= total; j++) {
+				int num2 = j;
+				pairs.add(new Pair(num1,num2));
+			}
+		}
+		return pairs;
+	}
+
+	int getPairWithHighestNumberOfShortestPathsTotal() {
+
+		return this.pairWithHighestShortestPathsTotal;		
+
+	}
+
+	public static void main ( String [] args ) throws Exception {
+
+		long startTime = System.nanoTime();
+		graph G = new graph();
+		int N = G.getNforGraph(args[1]);
+		double edges [][] = G.getGraphEdges(args[2] + ".csv", N);
+		G.makeGraph(edges); 
+
+		G.pairWithHighestNumberOfShortestPaths(N);
+
+
+//		G.printAdjMatrix();
+//		System.out.println(G.dijkstra(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
+
+		System.out.println();
+		System.out.println("Name: Mark Anthony Start");
+		System.out.println("Student ID: _________");
+		System.out.println();
+		System.out.println("Question 1: " + G.howManyShortestPathsBetweenPlaygroundAandB(14, 36));
+		System.out.println("Question 2: " + G.pairWithHighestNumberOfShortestPaths(N));
+		System.out.println("Question 3: " + G.getPairWithHighestNumberOfShortestPathsTotal() );
+		System.out.println("Question 4: " + "NOT DONE");
+		System.out.println("Question 5: " + "NOT DONE");
+		System.out.println("Question 6: " + "NOT DONE");
+		System.out.println("Question 7: " + "NOT DONE");
+		System.out.println();
+		
+
+
 	}
 
 
 
-// me
+
+	void printAdjMatrix(){
+		
+		for (int i=0;i<adj.length; i++){
+			for (int j=0;j<adj.length;j++){
+				System.out.print(adj[i][j]);
+			}
+			System.out.println("LINE " + i);
+		}
+	}
+
 
 	int findSmallest( HashMap <Integer, Double> nodeTDValue ) {
 
