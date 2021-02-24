@@ -7,6 +7,8 @@ public class graph {
 
 	double [] [] adj;
 	int pairWithHighestShortestPathsTotal;
+	int firstPairOfHighestShortestHopsA, firstPairOfHighestShortestHopsB;
+	int N;
 
 	graph(){
 	}
@@ -48,6 +50,82 @@ public class graph {
 		k.add(i);
 		return k;
 	}
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+
+/*
+
+	public HashSet <ArrayList <Integer>> shortestPaths1 (HashSet <ArrayList <Integer>> sofar, HashSet <Integer> visited, int end, boolean onlyFirstPath) {
+
+		HashSet <ArrayList <Integer>> more = new HashSet <ArrayList <Integer>>();
+		HashSet <ArrayList <Integer>> result = new HashSet <ArrayList <Integer>>();
+		HashSet <Integer> newVisited = (HashSet <Integer>) visited.clone();
+		
+		boolean done = false;
+		boolean carryon = false;
+		for (ArrayList <Integer> p: sofar)
+		{
+			for (Integer z: neighbours(p.get(p.size()-1)))
+			{
+				if (!visited.contains(z))
+				{
+					carryon=true;
+					newVisited.add(z);
+					if (z==end) {
+						done=true;
+						result.add(addToEnd(z,p));
+					}
+					else
+						more.add(addToEnd(z,p));
+				} if (z ==
+			}
+		}
+		if (done) return result; else
+			if (carryon)
+				return
+					shortestPaths1(more,newVisited,end, onlyFirstPath);
+			else
+				return new HashSet <ArrayList <Integer>>();
+	}
+
+
+	public HashSet <ArrayList <Integer>> shortestPaths (int first, int end, boolean onlyFirstPath) {
+		
+		HashSet <ArrayList <Integer>> sofar = new HashSet <ArrayList<Integer>>();
+		HashSet <Integer> visited = new HashSet<Integer>();
+		ArrayList <Integer> starting = new ArrayList<Integer>();
+
+		starting.add(first);
+		sofar.add(starting);
+		if (first==end)
+			return sofar;
+		visited.add(first);
+		return shortestPaths1(sofar,visited,end,onlyFirstPath);
+	}
+
+*/
+/////////////////////////////////////////////////
+//////////////////////////////////////////////////
+/////////////////////////////////////////////////
+
+
+
+
+
+
+
 
 
 	public HashSet <ArrayList <Integer>> shortestPaths1 (HashSet <ArrayList <Integer>> sofar, HashSet <Integer> visited, int end) {
@@ -129,9 +207,16 @@ public class graph {
 
         void makeGraph (double [] [] a) {
                 adj= new double [a.length][a.length];
+
+//		System.out.println("a.length = " + a.length);
+
                 for (int i=0;i<a.length;i++)
-                        for (int j=0;j<a.length;j++)
+                        for (int j=0;j<a.length;j++) {
                                 adj[i][j]=a[i][j];
+
+//				System.out.println("adj["+i+"]["+j+"] = a["+a[i][j]+"]"); 
+			}
+
 	}
 
 	double [][] getGraphEdges (String edgeValuesFile, int N) throws Exception {
@@ -146,6 +231,12 @@ public class graph {
 			String [] results = z.split(",");
 			try {
 				edges [Integer.parseInt(results[0]) - 1] [Integer.parseInt(results[1]) - 1] = Double.parseDouble(results[2]);
+
+//				int a = Integer.parseInt(results[0]);
+//				int b = Integer.parseInt(results[1]);
+//				System.out.println("edge: " + (a-1) + " " + (b-1) +  " is results: " + results[0] + " " + results[1] + " which = " + results[2]);
+
+
 			} catch (NumberFormatException nfe) {
 				// skip
 			}
@@ -153,12 +244,17 @@ public class graph {
 		return edges;
 	}
 
-	int howManyShortestPathsBetweenPlaygroundAandB( int a, int b) {
-		HashSet <ArrayList <Integer>> resultFromShortestPath = shortestPaths(a, b); 
-		return resultFromShortestPath.size();
-	}	
+	int howManyShortestPathsBetweenPlaygroundAandB( int a, int b ) {
+		HashSet <ArrayList <Integer>> resultFromShortestPath = shortestPaths(a-1, b-1); 
 
-	 String pairWithHighestNumberOfShortestPaths(int N) {
+//		System.out.println("RESULTS FROM :: " + resultFromShortestPath);
+//		System.out.println("Pair " + a + ", " + b + " has " + resultFromShortestPath.size() + " shortest paths.");
+
+		return resultFromShortestPath.size();
+	}
+
+
+	String pairWithHighestNumberOfShortestPaths(int N) {
 
 		List<Pair> pairs = getAllPairs(N);
 		List<Pair> highestPairs = new ArrayList<Pair>();
@@ -167,11 +263,12 @@ public class graph {
 		for (int i=0; i < pairs.size(); i++) {
 			int currentPairShortestPathsTotal = howManyShortestPathsBetweenPlaygroundAandB(pairs.get(i).x, pairs.get(i).y);
 
-
 			if (currentPairShortestPathsTotal > highestShortestPaths) {
 
 				highestPairs = new ArrayList<Pair>();
-				highestPairs.add( pairs.get(i) );
+
+				highestPairs.add( pairs.get(i) );	//gets ID's, not 0 indexed adj[][].
+
 				highestShortestPaths = currentPairShortestPathsTotal;
 
 			}	else if ( currentPairShortestPathsTotal == highestShortestPaths  ) {
@@ -191,7 +288,14 @@ public class graph {
 		String Answer = "";
 
 		for (int i = 0; i < highestPairs.size(); i++){
+
 			Answer += "[" + highestPairs.get(i).x + ", " + highestPairs.get(i).y + "]";
+
+			if ( i == 0 ) {
+				this.firstPairOfHighestShortestHopsA = highestPairs.get(0).x; 
+				this.firstPairOfHighestShortestHopsB = highestPairs.get(0).y;
+			}
+
 			if (i != highestPairs.size()-1) Answer += ",";
 		}
 
@@ -219,41 +323,114 @@ public class graph {
 				pairs.add(new Pair(num1,num2));
 			}
 		}
+		
+//		for (int i=0; i<pairs.size();i++){
+//			System.out.println(pairs.get(i).x + ", " + pairs.get(i).y);
+//		}
+
 		return pairs;
 	}
 
-	int getPairWithHighestNumberOfShortestPathsTotal() {
 
+	int getPairWithHighestNumberOfShortestPathsTotal() {
 		return this.pairWithHighestShortestPathsTotal;		
+	}
+
+
+	int getHighestPairHopCount() {
+		return highestPairShortestPathsHopCount( this.firstPairOfHighestShortestHopsA, this.firstPairOfHighestShortestHopsB);
+	}
+
+
+///////////// can save time here//////// re-write an above method to get the hashset not the .size();
+	int highestPairShortestPathsHopCount( int a, int b ) {
+
+		HashSet <ArrayList <Integer>> resultFromShortestPath = shortestPaths(a-1, b-1);   // send ID's to this method it will change to the 0 indexed sp method.
+		ArrayList<Integer> firstPathFromResults = new ArrayList<Integer>();
+
+//		System.out.println("RESULTS FROM SHORTEST PATHS FOR PAIRS " + a + ", " + b + ".");
+//	       	System.out.println();
+//		System.out.println( resultFromShortestPath );
+
+		firstPathFromResults = (ArrayList<Integer>) resultFromShortestPath.toArray()[0];
+
+//		System.out.println("First path from results .size (hop count) " + firstPathFromResults.size());
+
+		return firstPathFromResults.size(); 
+
+	}	
+////////////////////////////////////////
+
+	void setN (int N) {
+		this.N = N;
+	}
+
+	int getN() {
+		return this.N;
+	}
+
+
+	List<Pair> getAllDestinationsForAPlayground(int playgroundID) {
+		List<Pair> pairs = new ArrayList<Pair>();
+		for (int i=1; i<=this.N; i++) { 
+			if (i != playgroundID) pairs.add(new Pair(playgroundID, i));
+		}
+		return pairs;
+	}
+
+
+
+/////////////can save time here/////////////
+	void getShortestHopCountToAllPlaygroundsFromA( int playgroundID ) {
+
+                HashMap <Integer, Integer> playgroundIDToPlaygroundHopCount = new HashMap <Integer, Integer>();
+
+		for(int i=1; i <= N; i++) {
+			if (i != playgroundID) {
+				playgroundIDToPlaygroundHopCount.put(i, highestPairShortestPathsHopCount(playgroundID, i+1) ) ; ///////////HEREHERHERHERHEHRHE///////what are we getting returned ? uncomment System.out.println's to test, comment out main other questoins.
+
+			}
+		}
+
+		System.out.println(playgroundIDToPlaygroundHopCount);
+
+		
 
 	}
+/////////////////////////////////////////////
+	
+
+
 
 	public static void main ( String [] args ) throws Exception {
 
 		long startTime = System.nanoTime();
 		graph G = new graph();
 		int N = G.getNforGraph(args[1]);
-		double edges [][] = G.getGraphEdges(args[2] + ".csv", N);
+//		System.out.println("N for graph: " + N);
+		G.setN(N);
+		double edges [][] = G.getGraphEdges(args[2] + ".csv", G.getN());
 		G.makeGraph(edges); 
 
-		G.pairWithHighestNumberOfShortestPaths(N);
-
-
-//		G.printAdjMatrix();
+		G.getShortestHopCountToAllPlaygroundsFromA(9);
+		
 //		System.out.println(G.dijkstra(Integer.parseInt(args[0]), Integer.parseInt(args[1])));
+
 
 		System.out.println();
 		System.out.println("Name: Mark Anthony Start");
 		System.out.println("Student ID: _________");
 		System.out.println();
 		System.out.println("Question 1: " + G.howManyShortestPathsBetweenPlaygroundAandB(14, 36));
-		System.out.println("Question 2: " + G.pairWithHighestNumberOfShortestPaths(N));
+		System.out.println("Question 2: " + G.pairWithHighestNumberOfShortestPaths(G.getN()));
 		System.out.println("Question 3: " + G.getPairWithHighestNumberOfShortestPathsTotal() );
-		System.out.println("Question 4: " + "NOT DONE");
+		System.out.println("Question 4: " + G.getHighestPairHopCount());
+		//fine up to here (tested and A.O.K)
 		System.out.println("Question 5: " + "NOT DONE");
 		System.out.println("Question 6: " + "NOT DONE");
 		System.out.println("Question 7: " + "NOT DONE");
 		System.out.println();
+		System.out.println( ((System.nanoTime() - startTime)/1000000) + " milliseconds" );
 		
 
 
@@ -353,38 +530,8 @@ public class graph {
 
 /*
 
-	Set S = {start};
-	// S is the set of vertices for which the shortest paths from start have already been found
-	HashMap <Integer,Double> Q = Map each Vertex to Infinity
-	(Double.POSITIVE_INFINITY), except map start -> 0;
-	// Q.get(i) represents the shortest distance found from start to i found so far
-	ArrayList <Integer> [] paths;
-	For each i set path[i] to be the path just containing start.
-		
-		while (Q is not empty) {
-			let v be the key of Q with the smallest value;
-			//I've given you a method int findSmallest(HashMap <Integer,Double> t) for this
-				if (v is end and Q does not map v to infinity)
-					return paths[end]; let w be the value of v in Q;
-			add v to S;
-			for (each neighbour u of v) do
-			{
-				if (u not in S)
-				{
-					let w1 be the the weight of the (v,u) edge + w;
-					if w1 < the value of u in Q, then do the following:
-					{
-						update Q so now the value of u is w1
-							6update paths(u) to be paths(v) with u stuck on the
-							end
-					}
-				}
-				remove v from Q;
-			}
-		}
 
-
-
+You must override hashCode() in every class that overrides equals(). Failure to do so will result in a violation of the general contract for Object.hashCode(), which will prevent your class from functioning properly in conjunction with all hash-based collections, including HashMap, HashSet, and Hashtable.
 
 
 
